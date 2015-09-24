@@ -5,6 +5,8 @@ from contextlib import closing
 
 import MySQLdb
 import MySQLdb.cursors
+import MySQLdb.converters
+from MySQLdb.constants import FIELD_TYPE
 
 
 re_column_length = re.compile(r'\((\d+)\)')
@@ -44,7 +46,10 @@ class DB:
         self.options = args
 
     def connect(self):
-        self.conn = MySQLdb.connect(**self.options)
+         orig_conv = MySQLdb.converters.conversions
+         #Adding support for bit data type
+         orig_conv[FIELD_TYPE.BIT] = bool
+         self.conn = MySQLdb.connect(conv=orig_conv, **self.options)
 
     def close(self):
         self.conn.close()
